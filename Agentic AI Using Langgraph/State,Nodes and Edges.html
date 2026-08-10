@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LangGraph for Everyone 🤖</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #7C5CBF;
+    --purple-light: #EDE8FF;
+    --purple-dark: #4A3880;
+    --teal: #16A67A;
+    --teal-light: #D6F5EB;
+    --orange: #F07B29;
+    --orange-light: #FEF0E4;
+    --pink: #E0478A;
+    --pink-light: #FDEAF3;
+    --yellow: #F5C518;
+    --yellow-light: #FEF9E2;
+    --blue: #3A7BD5;
+    --blue-light: #E6EFFD;
+    --gray-bg: #F7F6FF;
+    --text-dark: #1E1A38;
+    --text-mid: #4A4570;
+    --text-muted: #8B87AA;
+    --white: #ffffff;
+    --card-shadow: 0 4px 20px rgba(124,92,191,0.10);
+    --card-shadow-hover: 0 8px 32px rgba(124,92,191,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--gray-bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: linear-gradient(135deg, #2D1B69 0%, #6B3FA0 50%, #9B59B6 100%);
+    padding: 60px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-emoji { font-size: 72px; display: block; margin-bottom: 16px; animation: bounce 2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 60px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--yellow); }
+  .hero p {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: rgba(255,255,255,0.85);
+    max-width: 600px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+  .hero-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .hero-tag {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* ---- NAV DOTS ---- */
+  .nav-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 20px 0;
+    background: white;
+    border-bottom: 2px solid var(--purple-light);
+    flex-wrap: wrap;
+  }
+  .nav-dot {
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    background: var(--gray-bg);
+    color: var(--text-mid);
+    text-decoration: none;
+  }
+  .nav-dot:hover { background: var(--purple-light); color: var(--purple-dark); border-color: var(--purple); }
+
+  /* ---- SECTIONS ---- */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .section .lead {
+    font-size: 18px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    max-width: 680px;
+    margin-bottom: 40px;
+  }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 28px;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+
+  /* ---- STORY SECTION ---- */
+  .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:620px){ .story-grid { grid-template-columns: 1fr; } }
+  .story-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+    border-top: 5px solid var(--purple);
+    position: relative;
+  }
+  .story-card .emoji { font-size: 40px; margin-bottom: 12px; }
+  .story-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .story-card p { font-size: 15px; color: var(--text-mid); line-height: 1.6; }
+  .story-card.teal { border-top-color: var(--teal); }
+  .story-card.orange { border-top-color: var(--orange); }
+  .story-card.pink { border-top-color: var(--pink); }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    border-top: 2px dashed #E0DBFF;
+    border-bottom: 2px dashed #E0DBFF;
+    background: var(--purple-light);
+    margin: 0;
+  }
+
+  /* ---- STATE SECTION ---- */
+  .state-viz {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: var(--card-shadow);
+  }
+  .backpack-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .backpack-svg-wrap { flex-shrink: 0; }
+  .backpack-items {
+    flex: 1;
+    min-width: 220px;
+  }
+  .backpack-items h4 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--purple-dark); }
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .item-row.empty { background: #F5F4FF; color: var(--text-muted); border-style: dashed; border-color: #C9C5EE; }
+  .item-row.filled { background: var(--purple-light); color: var(--purple-dark); border-color: var(--purple); }
+  .item-emoji { font-size: 22px; }
+  .item-key { font-size: 12px; font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+
+  /* Add/Remove animation */
+  @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .item-row.filled { animation: popIn 0.3s ease; }
+
+  /* ---- NODE SECTION ---- */
+  .node-explainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+  }
+  @media(max-width:640px){ .node-explainer { grid-template-columns: 1fr; } }
+  .node-card {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+  }
+  .node-card .node-icon {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 14px;
+  }
+  .node-card h4 { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+  .node-card p { font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+  .node-card .node-code {
+    font-family: monospace;
+    font-size: 12px;
+    background: var(--gray-bg);
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-top: 12px;
+    text-align: left;
+    color: var(--purple-dark);
+    line-height: 1.6;
+  }
+
+  /* ---- EDGE SECTION ---- */
+  .edge-visual {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: var(--card-shadow);
+  }
+  .edge-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .edge-tab {
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid var(--purple-light);
+    background: white;
+    color: var(--purple);
+    transition: all 0.2s;
+  }
+  .edge-tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+  .edge-panel { display: none; }
+  .edge-panel.active { display: block; }
+
+  /* ---- BIG GRAPH INTERACTIVE ---- */
+  .graph-stage {
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: var(--card-shadow);
+  }
+  .pipeline-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 20px 0;
+    position: relative;
+  }
+  .pipeline-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+  }
+  .pipeline-node .pn-box {
+    width: 90px; height: 90px;
+    border-radius: 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    border: 3px solid transparent;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+    padding: 8px;
+    gap: 4px;
+  }
+  .pipeline-node .pn-emoji { font-size: 26px; }
+  .pipeline-node .pn-label { font-size: 11px; font-weight: 800; line-height: 1.2; }
+  .pipeline-node:hover .pn-box { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(0,0,0,0.14); }
+  .pipeline-node.active-node .pn-box { transform: translateY(-8px) scale(1.08); }
+  .pn-arrow {
+    display: flex; align-items: center; justify-content: center;
+    flex: 1; min-width: 30px; height: 20px;
+    position: relative; margin-top: -35px;
+    z-index: 0;
+  }
+  .pn-arrow svg { width: 60px; height: 24px; }
+
+  /* pill status */
+  .status-pill {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-top: 8px;
+    transition: all 0.3s;
+  }
+
+  /* state box */
+  .live-state {
+    background: var(--gray-bg);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    border: 2px solid var(--purple-light);
+  }
+  .live-state .key { color: var(--purple-dark); font-weight: 700; }
+  .live-state .val { color: var(--teal); }
+  .live-state .val.empty { color: var(--text-muted); }
+  .live-state .changed { background: #FFF3B0; border-radius: 4px; padding: 0 4px; animation: highlight 1s ease; }
+  @keyframes highlight { 0%{background:#FFE500} 100%{background:#FFF3B0} }
+
+  .sim-controls { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .btn-main {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { background: var(--purple-dark); transform: scale(1.03); }
+  .btn-ghost { background: var(--purple-light); color: var(--purple-dark); }
+  .btn-ghost:hover { background: #DDD8FF; }
+  .btn-main:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .sim-message {
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--yellow-light);
+    border: 2px solid var(--yellow);
+    font-size: 14px;
+    font-weight: 700;
+    color: #7A5800;
+    margin-top: 14px;
+    min-height: 48px;
+    transition: all 0.3s;
+  }
+
+  /* ---- QUIZ ---- */
+  .quiz-section { background: white; border-radius: 24px; padding: 32px; box-shadow: var(--card-shadow); }
+  .quiz-q { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: 2px solid var(--purple-light);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover:not(:disabled) { background: var(--purple-light); border-color: var(--purple); }
+  .quiz-option.correct { background: var(--teal-light); border-color: var(--teal); color: #0A5C40; }
+  .quiz-option.wrong { background: #FFE8E8; border-color: #E05555; color: #8B1A1A; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-feedback { margin-top: 14px; font-size: 15px; font-weight: 700; min-height: 24px; }
+  .quiz-nav { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+  .quiz-progress { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+  /* ---- CHEAT SHEET ---- */
+  .cheat-sheet {
+    background: linear-gradient(135deg, #2D1B69, #6B3FA0);
+    border-radius: 24px;
+    padding: 40px 32px;
+    color: white;
+  }
+  .cheat-sheet h2 { color: white; margin-bottom: 28px; }
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:580px){ .cheat-grid { grid-template-columns: 1fr; } }
+  .cheat-card {
+    background: rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .cheat-card .cheat-emoji { font-size: 32px; margin-bottom: 8px; }
+  .cheat-card h4 { font-size: 16px; font-weight: 800; color: var(--yellow); margin-bottom: 6px; }
+  .cheat-card p { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .cheat-card code {
+    display: inline-block;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 6px;
+    font-family: monospace;
+    color: #BBF7D0;
+  }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .footer .footer-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+
+  /* ---- HIGHLIGHT BOX ---- */
+  .highlight-box {
+    background: var(--yellow-light);
+    border-left: 5px solid var(--yellow);
+    border-radius: 0 14px 14px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6B4A00;
+    line-height: 1.6;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--gray-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--purple-light); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-emoji">🤖</span>
+  <h1>LangGraph is Like a<br><span>Robot Factory!</span></h1>
+  <p>Learn about State, Nodes, Edges, and Graphs — explained like you're 9 years old 🎉</p>
+  <div class="hero-tags">
+    <span class="hero-tag">📦 State</span>
+    <span class="hero-tag">⚙️ Nodes</span>
+    <span class="hero-tag">➡️ Edges</span>
+    <span class="hero-tag">🕸️ Graph</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-dots">
+  <a class="nav-dot" href="#story">🏭 The Story</a>
+  <a class="nav-dot" href="#state">📦 State</a>
+  <a class="nav-dot" href="#nodes">⚙️ Nodes</a>
+  <a class="nav-dot" href="#edges">➡️ Edges</a>
+  <a class="nav-dot" href="#graph">🕸️ Full Graph</a>
+  <a class="nav-dot" href="#quiz">🎯 Quiz</a>
+  <a class="nav-dot" href="#cheatsheet">📋 Cheat Sheet</a>
+</div>
+
+<!-- ===================== STORY ===================== -->
+<div id="story" class="section">
+  <div class="section-label" style="background:var(--purple-light);color:var(--purple-dark)">🏭 Chapter 1</div>
+  <h2>Imagine a <span style="color:var(--purple)">Robot Cookie Factory</span></h2>
+  <p class="lead">LangGraph is like a factory where AI robots work together to do a big job. Each robot has ONE special job, they pass a box of information to each other, and follow a path to get from start to finish!</p>
+
+  <div class="story-grid">
+    <div class="story-card">
+      <div class="emoji">🍪</div>
+      <h3>The Big Goal</h3>
+      <p>We want to bake and deliver cookies. But no single robot can do it all alone. We need a <strong>team</strong> with a plan!</p>
+    </div>
+    <div class="story-card teal">
+      <div class="emoji">📦</div>
+      <h3>The Magic Box (State)</h3>
+      <p>All robots share ONE magic box. Each robot can read what's in the box, do their job, and put new stuff IN the box for the next robot.</p>
+    </div>
+    <div class="story-card orange">
+      <div class="emoji">⚙️</div>
+      <h3>The Robots (Nodes)</h3>
+      <p>Each robot is a <strong>Node</strong>. One robot mixes dough. One bakes. One decorates. Each robot has ONE job!</p>
+    </div>
+    <div class="story-card pink">
+      <div class="emoji">➡️</div>
+      <h3>The Hallways (Edges)</h3>
+      <p><strong>Edges</strong> are like hallways connecting robots. They tell each robot: "After you finish, send the box to THIS next robot!"</p>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:32px">
+    💡 In LangGraph: <strong>State</strong> = the magic box &nbsp;|&nbsp; <strong>Node</strong> = a robot (AI function) &nbsp;|&nbsp; <strong>Edge</strong> = hallway connecting robots &nbsp;|&nbsp; <strong>Graph</strong> = the whole factory!
+  </div>
+</div>
+
+<div class="divider">✨ NOW LET'S GO DEEP ON EACH CONCEPT ✨</div>
+
+<!-- ===================== STATE ===================== -->
+<div id="state" class="section">
+  <div class="section-label" style="background:var(--purple-light);color:var(--purple-dark)">📦 Chapter 2</div>
+  <h2>What is <span style="color:var(--purple)">State?</span></h2>
+  <p class="lead">State is like a <strong>school backpack</strong> 🎒 that every robot can open and read. When a robot finishes its job, it puts new things INTO the backpack and passes it to the next robot.</p>
+
+  <div class="state-viz">
+    <div class="backpack-container">
+      <div class="backpack-svg-wrap">
+        <svg width="150" height="180" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- backpack body -->
+          <rect x="20" y="50" width="110" height="120" rx="18" fill="#7C5CBF"/>
+          <!-- top handle -->
+          <rect x="55" y="30" width="40" height="30" rx="10" fill="none" stroke="#7C5CBF" stroke-width="8"/>
+          <!-- front pocket -->
+          <rect x="35" y="100" width="80" height="55" rx="12" fill="#6347A8"/>
+          <!-- pocket zipper -->
+          <line x1="45" y1="100" x2="115" y2="100" stroke="#9B7FD4" stroke-width="3" stroke-linecap="round"/>
+          <!-- straps -->
+          <path d="M38 55 Q28 90 32 155" stroke="#5A3A99" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <path d="M112 55 Q122 90 118 155" stroke="#5A3A99" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <!-- shine -->
+          <ellipse cx="52" cy="75" rx="10" ry="6" fill="white" opacity="0.15" transform="rotate(-20 52 75)"/>
+          <!-- label -->
+          <text x="75" y="88" text-anchor="middle" fill="white" font-family="Nunito,sans-serif" font-size="11" font-weight="800">State</text>
+          <text x="75" y="138" text-anchor="middle" fill="#C9B8FF" font-family="Nunito,sans-serif" font-size="10">TypedDict</text>
+        </svg>
+      </div>
+      <div class="backpack-items">
+        <h4>What's inside the backpack? 👀</h4>
+        <div id="state-items">
+          <div class="item-row filled" id="item-topic">
+            <span class="item-emoji">📝</span>
+            <span>"AI in Education"</span>
+            <span class="item-key">topic</span>
+          </div>
+          <div class="item-row empty" id="item-facts">
+            <span class="item-emoji">📚</span>
+            <span style="font-style:italic">empty — not yet researched</span>
+            <span class="item-key">facts</span>
+          </div>
+          <div class="item-row empty" id="item-draft">
+            <span class="item-emoji">✍️</span>
+            <span style="font-style:italic">empty — not yet written</span>
+            <span class="item-key">draft</span>
+          </div>
+          <div class="item-row empty" id="item-review">
+            <span class="item-emoji">🔍</span>
+            <span style="font-style:italic">empty — not yet reviewed</span>
+            <span class="item-key">review</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-main btn-purple" onclick="fillState()" id="btn-fill">▶ Watch it fill up!</button>
+          <button class="btn-main btn-ghost" onclick="resetState()">↺ Reset</button>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:var(--text-muted)">Each robot adds ONE thing to the backpack.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:2px dashed #E0DBFF">
+      <h4 style="font-size:15px;font-weight:800;margin-bottom:12px;color:var(--purple-dark)">The Python code looks like this:</h4>
+      <div style="background:#1E1A38;border-radius:14px;padding:20px;font-family:monospace;font-size:13px;line-height:1.8;overflow-x:auto">
+        <span style="color:#9B7FD4">from</span> <span style="color:#5EC9E5">typing</span> <span style="color:#9B7FD4">import</span> <span style="color:white">TypedDict, List</span><br><br>
+        <span style="color:#9B7FD4">class</span> <span style="color:#F5C518">BlogState</span><span style="color:white">(TypedDict):</span><br>
+        <span style="color:white">&nbsp;&nbsp;&nbsp;&nbsp;topic:&nbsp;&nbsp;</span><span style="color:#5EC9E5">str</span><span style="color:#7B7A9D">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 📝 the blog topic</span><br>
+        <span style="color:white">&nbsp;&nbsp;&nbsp;&nbsp;facts:&nbsp;&nbsp;</span><span style="color:#5EC9E5">List[str]</span><span style="color:#7B7A9D">&nbsp;&nbsp;&nbsp;# 📚 researched facts</span><br>
+        <span style="color:white">&nbsp;&nbsp;&nbsp;&nbsp;draft:&nbsp;&nbsp;</span><span style="color:#5EC9E5">str</span><span style="color:#7B7A9D">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# ✍️ written blog</span><br>
+        <span style="color:white">&nbsp;&nbsp;&nbsp;&nbsp;review: </span><span style="color:#5EC9E5">str</span><span style="color:#7B7A9D">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 🔍 editor feedback</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NODES ===================== -->
+<div id="nodes" class="section">
+  <div class="section-label" style="background:var(--teal-light);color:#0A5C40">⚙️ Chapter 3</div>
+  <h2>What are <span style="color:var(--teal)">Nodes?</span></h2>
+  <p class="lead">A Node is a <strong>robot with ONE job</strong>. It opens the backpack, reads what it needs, does its work, and puts its result back in the backpack. That's it!</p>
+
+  <div class="node-explainer">
+    <div class="node-card">
+      <div class="node-icon" style="background:var(--purple-light)">🔬</div>
+      <h4 style="color:var(--purple)">research_node</h4>
+      <p>Reads <code style="font-family:monospace;background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:12px">topic</code> from backpack. Searches for facts. Puts facts back in.</p>
+      <div class="node-code">
+        <span style="color:#9B7FD4">def</span> <span style="color:var(--purple)">research_node</span>(state):<br>
+        &nbsp;&nbsp;topic = state[<span style="color:#F5A623">"topic"</span>]<br>
+        &nbsp;&nbsp;facts = llm(topic)<br>
+        &nbsp;&nbsp;<span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"facts"</span>: facts}
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-icon" style="background:var(--teal-light)">✍️</div>
+      <h4 style="color:var(--teal)">draft_node</h4>
+      <p>Reads <code style="font-family:monospace;background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:12px">facts</code> from backpack. Writes a blog post. Puts draft back in.</p>
+      <div class="node-code">
+        <span style="color:#9B7FD4">def</span> <span style="color:var(--teal)">draft_node</span>(state):<br>
+        &nbsp;&nbsp;facts = state[<span style="color:#F5A623">"facts"</span>]<br>
+        &nbsp;&nbsp;draft = llm(facts)<br>
+        &nbsp;&nbsp;<span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"draft"</span>: draft}
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-icon" style="background:var(--orange-light)">🔍</div>
+      <h4 style="color:var(--orange)">review_node</h4>
+      <p>Reads <code style="font-family:monospace;background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:12px">draft</code> from backpack. Checks for quality. Puts review back in.</p>
+      <div class="node-code">
+        <span style="color:#9B7FD4">def</span> <span style="color:var(--orange)">review_node</span>(state):<br>
+        &nbsp;&nbsp;draft = state[<span style="color:#F5A623">"draft"</span>]<br>
+        &nbsp;&nbsp;review = llm(draft)<br>
+        &nbsp;&nbsp;<span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"review"</span>: review}
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:28px">
+    🤔 <strong>Key rule:</strong> A node never talks directly to another node. They only communicate through the shared State (backpack)! Node in → updates backpack → Node out.
+  </div>
+</div>
+
+<!-- ===================== EDGES ===================== -->
+<div id="edges" class="section">
+  <div class="section-label" style="background:var(--orange-light);color:#8A3A00">➡️ Chapter 4</div>
+  <h2>What are <span style="color:var(--orange)">Edges?</span></h2>
+  <p class="lead">Edges are like <strong>hallways or roads</strong> connecting rooms (nodes). They decide: after THIS robot finishes, WHICH robot goes next?</p>
+
+  <div class="edge-visual">
+    <div class="edge-tabs">
+      <button class="edge-tab active" onclick="showEdge('normal', this)">➡️ Normal Edge</button>
+      <button class="edge-tab" onclick="showEdge('conditional', this)">🔀 Conditional Edge</button>
+      <button class="edge-tab" onclick="showEdge('start', this)">🚀 START & END</button>
+    </div>
+
+    <!-- Normal Edge -->
+    <div class="edge-panel active" id="edge-normal">
+      <h4 style="font-size:17px;font-weight:800;margin-bottom:10px;color:var(--orange)">Normal Edge — Always goes the same way</h4>
+      <p style="font-size:15px;color:var(--text-mid);margin-bottom:20px;line-height:1.6">Like a one-way street. After Node A finishes, it ALWAYS goes to Node B. No choices. Always the same path.</p>
+      <svg width="100%" viewBox="0 0 500 100" style="max-width:500px;display:block;margin:0 auto">
+        <rect x="20" y="25" width="130" height="50" rx="12" fill="#EDE8FF" stroke="#7C5CBF" stroke-width="2"/>
+        <text x="85" y="45" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#4A3880">research_node</text>
+        <text x="85" y="63" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#7C5CBF">does research</text>
+        <line x1="152" y1="50" x2="232" y2="50" stroke="#F07B29" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="228,44 240,50 228,56" fill="#F07B29"/>
+        <text x="196" y="40" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#F07B29" font-weight="700">always</text>
+        <rect x="242" y="25" width="130" height="50" rx="12" fill="#D6F5EB" stroke="#16A67A" stroke-width="2"/>
+        <text x="307" y="45" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#0A5C40">draft_node</text>
+        <text x="307" y="63" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#16A67A">writes draft</text>
+      </svg>
+      <div style="background:#1E1A38;border-radius:14px;padding:16px 20px;font-family:monospace;font-size:13px;margin-top:20px;line-height:1.8;overflow-x:auto">
+        <span style="color:#7B7A9D"># Normal edge: research → draft, always!</span><br>
+        graph.add_edge(<span style="color:#F5A623">"research_node"</span>, <span style="color:#F5A623">"draft_node"</span>)
+      </div>
+    </div>
+
+    <!-- Conditional Edge -->
+    <div class="edge-panel" id="edge-conditional">
+      <h4 style="font-size:17px;font-weight:800;margin-bottom:10px;color:var(--orange)">Conditional Edge — Makes a choice!</h4>
+      <p style="font-size:15px;color:var(--text-mid);margin-bottom:20px;line-height:1.6">Like a crossroads! The robot checks the state, asks a question, and based on the answer, goes LEFT or RIGHT. This is how LangGraph does IF/ELSE!</p>
+      <svg width="100%" viewBox="0 0 500 200" style="max-width:500px;display:block;margin:0 auto">
+        <!-- review box -->
+        <rect x="20" y="75" width="130" height="50" rx="12" fill="#FEF0E4" stroke="#F07B29" stroke-width="2"/>
+        <text x="85" y="97" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#8A3A00">review_node</text>
+        <text x="85" y="113" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#F07B29">checks draft</text>
+        <!-- decision diamond -->
+        <polygon points="230,50 280,100 230,150 180,100" fill="#FEF9E2" stroke="#F5C518" stroke-width="2"/>
+        <text x="230" y="97" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="800" fill="#7A5800">Good</text>
+        <text x="230" y="112" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="800" fill="#7A5800">enough?</text>
+        <!-- arrow from review to diamond -->
+        <line x1="152" y1="100" x2="178" y2="100" stroke="#7B7A9D" stroke-width="2"/>
+        <polygon points="174,95 180,100 174,105" fill="#7B7A9D"/>
+        <!-- YES arrow -->
+        <line x1="280" y1="100" x2="355" y2="100" stroke="#16A67A" stroke-width="2.5" stroke-dasharray="5,3"/>
+        <polygon points="351,95 358,100 351,105" fill="#16A67A"/>
+        <text x="318" y="90" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#16A67A" font-weight="700">YES ✅</text>
+        <rect x="358" y="75" width="110" height="50" rx="12" fill="#D6F5EB" stroke="#16A67A" stroke-width="2"/>
+        <text x="413" y="100" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#0A5C40">END 🎉</text>
+        <!-- NO arrow -->
+        <line x1="230" y1="150" x2="230" y2="185" stroke="#E0478A" stroke-width="2.5" stroke-dasharray="5,3"/>
+        <polygon points="225,181 230,188 235,181" fill="#E0478A"/>
+        <text x="248" y="176" font-family="Nunito,sans-serif" font-size="11" fill="#E0478A" font-weight="700">NO ❌ → revise again!</text>
+      </svg>
+      <div style="background:#1E1A38;border-radius:14px;padding:16px 20px;font-family:monospace;font-size:13px;margin-top:20px;line-height:1.8;overflow-x:auto">
+        <span style="color:#9B7FD4">def</span> <span style="color:#F5C518">should_continue</span>(state):<br>
+        &nbsp;&nbsp;<span style="color:#9B7FD4">if</span> state[<span style="color:#F5A623">"review"</span>] == <span style="color:#F5A623">"GOOD"</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#9B7FD4">return</span> <span style="color:#F5A623">"end"</span>&nbsp;&nbsp;<span style="color:#7B7A9D"># ✅ go to END</span><br>
+        &nbsp;&nbsp;<span style="color:#9B7FD4">return</span> <span style="color:#F5A623">"draft_node"</span>&nbsp;<span style="color:#7B7A9D"># ❌ rewrite!</span><br><br>
+        graph.add_conditional_edges(<span style="color:#F5A623">"review_node"</span>, should_continue)
+      </div>
+    </div>
+
+    <!-- START & END -->
+    <div class="edge-panel" id="edge-start">
+      <h4 style="font-size:17px;font-weight:800;margin-bottom:10px;color:var(--orange)">START and END — Every graph needs them!</h4>
+      <p style="font-size:15px;color:var(--text-mid);margin-bottom:20px;line-height:1.6">Every factory has a <strong>front door</strong> (START) and a <strong>finished products shelf</strong> (END). LangGraph is the same!</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:480px">
+        <div style="background:var(--gray-bg);border-radius:14px;padding:16px;text-align:center">
+          <div style="font-size:36px;margin-bottom:8px">🚪</div>
+          <div style="font-weight:800;font-size:15px;margin-bottom:6px;color:var(--purple-dark)">START</div>
+          <div style="font-size:13px;color:var(--text-mid)">Where you call <code style="font-family:monospace;background:var(--purple-light);padding:2px 6px;border-radius:4px">graph.invoke()</code> with the starting state.</div>
+        </div>
+        <div style="background:var(--gray-bg);border-radius:14px;padding:16px;text-align:center">
+          <div style="font-size:36px;margin-bottom:8px">🏁</div>
+          <div style="font-weight:800;font-size:15px;margin-bottom:6px;color:var(--teal)">END</div>
+          <div style="font-size:13px;color:var(--text-mid)">Where the graph stops and gives you the final state (the full backpack!).</div>
+        </div>
+      </div>
+      <div style="background:#1E1A38;border-radius:14px;padding:16px 20px;font-family:monospace;font-size:13px;margin-top:20px;line-height:1.8;overflow-x:auto">
+        <span style="color:#9B7FD4">from</span> <span style="color:#5EC9E5">langgraph.graph</span> <span style="color:#9B7FD4">import</span> <span style="color:white">START, END</span><br><br>
+        graph.add_edge(START, <span style="color:#F5A623">"research_node"</span>)<span style="color:#7B7A9D">&nbsp;&nbsp;# 🚪 enter</span><br>
+        graph.add_edge(<span style="color:#F5A623">"review_node"</span>, END)&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7B7A9D"># 🏁 finish</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== GRAPH ===================== -->
+<div id="graph" class="section">
+  <div class="section-label" style="background:var(--pink-light);color:#7A1248">🕸️ Chapter 5</div>
+  <h2>The Full <span style="color:var(--pink)">Graph!</span></h2>
+  <p class="lead">Now let's put it ALL together! Press <strong>"Run step by step"</strong> and watch your AI blog-writing factory come to life. See the State (backpack) change at each step!</p>
+
+  <div class="graph-stage">
+    <!-- Pipeline visual -->
+    <div class="pipeline-track" id="pipeline-track">
+      <!-- START -->
+      <div class="pipeline-node" id="pnode-start">
+        <div class="pn-box" style="background:#2D1B69;border-color:#2D1B69;color:white;width:70px;height:70px;border-radius:50%">
+          <span class="pn-emoji" style="font-size:20px">🚪</span>
+          <span class="pn-label" style="font-size:10px">START</span>
+        </div>
+        <div class="status-pill" id="pill-start" style="background:#E8E6FF;color:#4A3880;font-size:10px">waiting</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pn-arrow">
+        <svg viewBox="0 0 60 24"><line x1="4" y1="12" x2="52" y2="12" stroke="#C9C5EE" stroke-width="2.5"/><polygon points="46,7 56,12 46,17" fill="#C9C5EE"/></svg>
+      </div>
+
+      <!-- research_node -->
+      <div class="pipeline-node" id="pnode-research" onclick="nodeClick('research')">
+        <div class="pn-box" style="background:var(--purple-light);border-color:var(--purple);color:var(--purple-dark)">
+          <span class="pn-emoji">🔬</span>
+          <span class="pn-label">research_<br>node</span>
+        </div>
+        <div class="status-pill" id="pill-research" style="background:#E8E6FF;color:#4A3880;font-size:10px">waiting</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pn-arrow">
+        <svg viewBox="0 0 60 24"><line x1="4" y1="12" x2="52" y2="12" stroke="#C9C5EE" stroke-width="2.5"/><polygon points="46,7 56,12 46,17" fill="#C9C5EE"/></svg>
+      </div>
+
+      <!-- draft_node -->
+      <div class="pipeline-node" id="pnode-draft" onclick="nodeClick('draft')">
+        <div class="pn-box" style="background:var(--teal-light);border-color:var(--teal);color:#0A5C40">
+          <span class="pn-emoji">✍️</span>
+          <span class="pn-label">draft_<br>node</span>
+        </div>
+        <div class="status-pill" id="pill-draft" style="background:#E8E6FF;color:#4A3880;font-size:10px">waiting</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pn-arrow">
+        <svg viewBox="0 0 60 24"><line x1="4" y1="12" x2="52" y2="12" stroke="#C9C5EE" stroke-width="2.5"/><polygon points="46,7 56,12 46,17" fill="#C9C5EE"/></svg>
+      </div>
+
+      <!-- review_node -->
+      <div class="pipeline-node" id="pnode-review" onclick="nodeClick('review')">
+        <div class="pn-box" style="background:var(--orange-light);border-color:var(--orange);color:#8A3A00">
+          <span class="pn-emoji">🔍</span>
+          <span class="pn-label">review_<br>node</span>
+        </div>
+        <div class="status-pill" id="pill-review" style="background:#E8E6FF;color:#4A3880;font-size:10px">waiting</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pn-arrow">
+        <svg viewBox="0 0 60 24"><line x1="4" y1="12" x2="52" y2="12" stroke="#C9C5EE" stroke-width="2.5"/><polygon points="46,7 56,12 46,17" fill="#C9C5EE"/></svg>
+      </div>
+
+      <!-- END -->
+      <div class="pipeline-node" id="pnode-end">
+        <div class="pn-box" style="background:#1E1A38;border-color:#1E1A38;color:white;width:70px;height:70px;border-radius:50%">
+          <span class="pn-emoji" style="font-size:20px">🏁</span>
+          <span class="pn-label" style="font-size:10px">END</span>
+        </div>
+        <div class="status-pill" id="pill-end" style="background:#E8E6FF;color:#4A3880;font-size:10px">waiting</div>
+      </div>
+    </div>
+
+    <!-- Live State Display -->
+    <div style="margin-top:4px;font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:6px">📦 Live Backpack (State):</div>
+    <div class="live-state" id="live-state">
+      <span class="key">topic:</span>&nbsp;<span class="val" id="ls-topic">"AI in Education"</span><br>
+      <span class="key">facts:</span>&nbsp;<span class="val empty" id="ls-facts">[ ]  ← empty</span><br>
+      <span class="key">draft:</span>&nbsp;<span class="val empty" id="ls-draft">""  ← empty</span><br>
+      <span class="key">review:</span>&nbsp;<span class="val empty" id="ls-review">""  ← empty</span>
+    </div>
+
+    <!-- Message -->
+    <div class="sim-message" id="sim-msg">👆 Press "Run step by step" to start the AI factory!</div>
+
+    <!-- Controls -->
+    <div class="sim-controls">
+      <button class="btn-main btn-purple" id="btn-step" onclick="runStep()">▶ Run step by step</button>
+      <button class="btn-main btn-ghost" onclick="resetGraph()">↺ Reset</button>
+      <span style="font-size:13px;color:var(--text-muted)" id="step-counter">Step 0 / 5</span>
+    </div>
+
+    <!-- Full code -->
+    <details style="margin-top:24px">
+      <summary style="cursor:pointer;font-size:14px;font-weight:800;color:var(--purple);padding:10px 0">📜 See the full LangGraph code &nbsp;▾</summary>
+      <div style="background:#1E1A38;border-radius:14px;padding:20px;font-family:monospace;font-size:12px;margin-top:12px;line-height:1.9;overflow-x:auto">
+        <span style="color:#9B7FD4">from</span> <span style="color:#5EC9E5">langgraph.graph</span> <span style="color:#9B7FD4">import</span> <span style="color:white">StateGraph, START, END</span><br>
+        <span style="color:#9B7FD4">from</span> <span style="color:#5EC9E5">typing</span> <span style="color:#9B7FD4">import</span> <span style="color:white">TypedDict, List</span><br><br>
+        <span style="color:#7B7A9D"># 1️⃣ Define State (the backpack)</span><br>
+        <span style="color:#9B7FD4">class</span> <span style="color:#F5C518">BlogState</span>(TypedDict):<br>
+        <span style="color:white">&nbsp;&nbsp;&nbsp;&nbsp;topic: str; facts: List[str]; draft: str; review: str</span><br><br>
+        <span style="color:#7B7A9D"># 2️⃣ Define Nodes (the robots)</span><br>
+        <span style="color:#9B7FD4">def</span> <span style="color:#7C5CBF">research_node</span>(state): <span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"facts"</span>: llm(state[<span style="color:#F5A623">"topic"</span>])}<br>
+        <span style="color:#9B7FD4">def</span> <span style="color:#16A67A">draft_node</span>(state): <span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"draft"</span>: llm(state[<span style="color:#F5A623">"facts"</span>])}<br>
+        <span style="color:#9B7FD4">def</span> <span style="color:#F07B29">review_node</span>(state): <span style="color:#9B7FD4">return</span> {<span style="color:#F5A623">"review"</span>: llm(state[<span style="color:#F5A623">"draft"</span>])}<br><br>
+        <span style="color:#7B7A9D"># 3️⃣ Build the Graph</span><br>
+        graph = <span style="color:#F5C518">StateGraph</span>(BlogState)<br>
+        graph.add_node(<span style="color:#F5A623">"research_node"</span>, research_node)<br>
+        graph.add_node(<span style="color:#F5A623">"draft_node"</span>, draft_node)<br>
+        graph.add_node(<span style="color:#F5A623">"review_node"</span>, review_node)<br><br>
+        <span style="color:#7B7A9D"># 4️⃣ Add Edges (the hallways)</span><br>
+        graph.add_edge(START, <span style="color:#F5A623">"research_node"</span>)<br>
+        graph.add_edge(<span style="color:#F5A623">"research_node"</span>, <span style="color:#F5A623">"draft_node"</span>)<br>
+        graph.add_edge(<span style="color:#F5A623">"draft_node"</span>, <span style="color:#F5A623">"review_node"</span>)<br>
+        graph.add_edge(<span style="color:#F5A623">"review_node"</span>, END)<br><br>
+        <span style="color:#7B7A9D"># 5️⃣ Compile & Run!</span><br>
+        app = graph.<span style="color:#5EC9E5">compile</span>()<br>
+        result = app.<span style="color:#5EC9E5">invoke</span>({<span style="color:#F5A623">"topic"</span>: <span style="color:#F5A623">"AI in Education"</span>})
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ===================== QUIZ ===================== -->
+<div id="quiz" class="section">
+  <div class="section-label" style="background:var(--yellow-light);color:#7A5800">🎯 Chapter 6</div>
+  <h2>Test Your <span style="color:var(--yellow)">Knowledge!</span></h2>
+  <p class="lead">Let's see what you've learned! Answer these quick questions 🚀</p>
+
+  <div class="quiz-section">
+    <div id="quiz-container"></div>
+    <div class="quiz-nav">
+      <button class="btn-main btn-purple" id="quiz-next-btn" onclick="nextQuestion()" style="display:none">Next question →</button>
+      <div class="quiz-progress" id="quiz-progress">Question 1 of 5</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CHEAT SHEET ===================== -->
+<div id="cheatsheet" class="section">
+  <div class="cheat-sheet">
+    <div class="section-label" style="background:rgba(255,255,255,0.2);color:white;margin-bottom:12px">📋 Quick Reference</div>
+    <h2>Your LangGraph Cheat Sheet 🚀</h2>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-emoji">📦</div>
+        <h4>State</h4>
+        <p>A shared backpack of data. All nodes read from it and write back to it. Defined as a <code>TypedDict</code>.</p>
+        <code>class MyState(TypedDict): ...</code>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-emoji">⚙️</div>
+        <h4>Node</h4>
+        <p>A Python function with ONE job. Takes state as input, returns a partial dict to update state.</p>
+        <code>def my_node(state): return {}</code>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-emoji">➡️</div>
+        <h4>Normal Edge</h4>
+        <p>Always goes from A to B. No decisions. Use <code>add_edge()</code>.</p>
+        <code>graph.add_edge("A", "B")</code>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-emoji">🔀</div>
+        <h4>Conditional Edge</h4>
+        <p>Checks state and decides which node to go to next. Like an if/else!</p>
+        <code>graph.add_conditional_edges("A", fn)</code>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-emoji">🚪</div>
+        <h4>START</h4>
+        <p>The entry point of every graph. Connect it to your first node.</p>
+        <code>graph.add_edge(START, "first_node")</code>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-emoji">🏁</div>
+        <h4>END</h4>
+        <p>The exit point. Graph stops here and returns the final state.</p>
+        <code>graph.add_edge("last_node", END)</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-emoji">🎉</span>
+  Made with ❤️ for Sheryians AI School students<br>
+  <span style="margin-top:4px;display:inline-block">LangGraph • State • Nodes • Edges • Graphs</span>
+</div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+// ---- STATE FILL ANIMATION ----
+let fillStep = 0;
+function fillState() {
+  const steps = [
+    {
+      id: 'item-facts',
+      emoji: '📚',
+      text: '["AI tutors personalize...", "Khan Academy uses AI...", "30% faster learning"]',
+      key: 'facts'
+    },
+    {
+      id: 'item-draft',
+      emoji: '✍️',
+      text: '"# AI in Education\\nAI is transforming how students learn..."',
+      key: 'draft'
+    },
+    {
+      id: 'item-review',
+      emoji: '🔍',
+      text: '"Good structure! Add more stats in paragraph 2."',
+      key: 'review'
+    }
+  ];
+  if (fillStep < steps.length) {
+    const s = steps[fillStep];
+    const el = document.getElementById(s.id);
+    el.className = 'item-row filled';
+    el.innerHTML = `<span class="item-emoji">${s.emoji}</span><span style="font-size:12px">${s.text}</span><span class="item-key">${s.key}</span>`;
+    fillStep++;
+    if (fillStep === steps.length) {
+      document.getElementById('btn-fill').textContent = '✅ All filled!';
+      document.getElementById('btn-fill').disabled = true;
+    }
+  }
+}
+function resetState() {
+  fillStep = 0;
+  const empties = [
+    { id: 'item-facts', emoji: '📚', text: 'empty — not yet researched', key: 'facts' },
+    { id: 'item-draft', emoji: '✍️', text: 'empty — not yet written', key: 'draft' },
+    { id: 'item-review', emoji: '🔍', text: 'empty — not yet reviewed', key: 'review' }
+  ];
+  empties.forEach(e => {
+    const el = document.getElementById(e.id);
+    el.className = 'item-row empty';
+    el.innerHTML = `<span class="item-emoji">${e.emoji}</span><span style="font-style:italic">${e.text}</span><span class="item-key">${e.key}</span>`;
+  });
+  const btn = document.getElementById('btn-fill');
+  btn.textContent = '▶ Watch it fill up!';
+  btn.disabled = false;
+}
+
+// ---- EDGE TABS ----
+function showEdge(id, btn) {
+  document.querySelectorAll('.edge-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.edge-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('edge-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ---- GRAPH SIMULATION ----
+let graphStep = 0;
+const graphSteps = [
+  {
+    node: 'start',
+    pill: { start: '🟢 active' },
+    state: {
+      topic: '"AI in Education"',
+      facts: { val: '[ ]', empty: true },
+      draft: { val: '""', empty: true },
+      review: { val: '""', empty: true }
+    },
+    msg: '🚪 Graph started! The backpack arrives with just the topic. research_node is next...'
+  },
+  {
+    node: 'research',
+    pill: { start: '✅ done', research: '🟢 running' },
+    state: {
+      topic: '"AI in Education"',
+      facts: { val: '["AI tutors personalize learning", "Khan Academy uses AI", ...]', empty: false, changed: true },
+      draft: { val: '""', empty: true },
+      review: { val: '""', empty: true }
+    },
+    msg: '🔬 research_node is working! It read "topic" and wrote 3 facts into the backpack. Edge sends state to draft_node...'
+  },
+  {
+    node: 'draft',
+    pill: { start: '✅ done', research: '✅ done', draft: '🟢 running' },
+    state: {
+      topic: '"AI in Education"',
+      facts: { val: '["AI tutors personalize learning", "Khan Academy uses AI", ...]', empty: false },
+      draft: { val: '"# AI in Education\\nAI is transforming how students learn worldwide..."', empty: false, changed: true },
+      review: { val: '""', empty: true }
+    },
+    msg: '✍️ draft_node is working! It read the facts and wrote a full blog post. Edge sends state to review_node...'
+  },
+  {
+    node: 'review',
+    pill: { start: '✅ done', research: '✅ done', draft: '✅ done', review: '🟢 running' },
+    state: {
+      topic: '"AI in Education"',
+      facts: { val: '["AI tutors personalize learning", "Khan Academy uses AI", ...]', empty: false },
+      draft: { val: '"# AI in Education\\nAI is transforming how students learn worldwide..."', empty: false },
+      review: { val: '"Great structure! Add more data stats in paragraph 2."', empty: false, changed: true }
+    },
+    msg: '🔍 review_node is working! It read the draft and wrote feedback. Edge says: go to END!'
+  },
+  {
+    node: 'end',
+    pill: { start: '✅ done', research: '✅ done', draft: '✅ done', review: '✅ done', end: '🏁 done' },
+    state: {
+      topic: '"AI in Education"',
+      facts: { val: '["AI tutors personalize learning", "Khan Academy uses AI", ...]', empty: false },
+      draft: { val: '"# AI in Education\\nAI is transforming how students learn worldwide..."', empty: false },
+      review: { val: '"Great structure! Add more data stats in paragraph 2."', empty: false }
+    },
+    msg: '🎉 DONE! The graph finished. The full backpack (state) is returned to you. All 4 keys are filled!'
+  }
+];
+
+const nodeColors = {
+  start: { bg: '#2D1B69', border: '#2D1B69', text: 'white' },
+  research: { bg: 'var(--purple-light)', border: 'var(--purple)', text: 'var(--purple-dark)' },
+  draft: { bg: 'var(--teal-light)', border: 'var(--teal)', text: '#0A5C40' },
+  review: { bg: 'var(--orange-light)', border: 'var(--orange)', text: '#8A3A00' },
+  end: { bg: '#1E1A38', border: '#1E1A38', text: 'white' }
+};
+
+function runStep() {
+  if (graphStep >= graphSteps.length) return;
+  const step = graphSteps[graphStep];
+
+  // update pills
+  const pillColors = {
+    '🟢 running': { bg: '#D6F5EB', color: '#0A5C40' },
+    '✅ done': { bg: '#D6F5EB', color: '#0A5C40' },
+    '🏁 done': { bg: '#FEF0E4', color: '#8A3A00' },
+    'waiting': { bg: '#E8E6FF', color: '#4A3880' }
+  };
+  Object.keys(step.pill).forEach(k => {
+    const pill = document.getElementById('pill-' + k);
+    const val = step.pill[k];
+    pill.textContent = val;
+    const pc = pillColors[val] || pillColors['waiting'];
+    pill.style.background = pc.bg;
+    pill.style.color = pc.color;
+  });
+
+  // highlight active node
+  ['start','research','draft','review','end'].forEach(n => {
+    const pnode = document.getElementById('pnode-' + n);
+    pnode.classList.remove('active-node');
+  });
+  document.getElementById('pnode-' + step.node).classList.add('active-node');
+
+  // update live state
+  const s = step.state;
+  const lsTopic = document.getElementById('ls-topic');
+  const lsFacts = document.getElementById('ls-facts');
+  const lsDraft = document.getElementById('ls-draft');
+  const lsReview = document.getElementById('ls-review');
+
+  lsTopic.textContent = s.topic;
+  lsTopic.className = 'val';
+
+  function setVal(el, data) {
+    el.textContent = data.val;
+    el.className = data.empty ? 'val empty' : (data.changed ? 'val changed' : 'val');
+  }
+  setVal(lsFacts, s.facts);
+  setVal(lsDraft, s.draft);
+  setVal(s.review ? lsReview : lsReview, s.review || { val: '""', empty: true });
+  if (s.review) setVal(lsReview, s.review);
+
+  // update message
+  document.getElementById('sim-msg').textContent = step.msg;
+  document.getElementById('step-counter').textContent = 'Step ' + (graphStep + 1) + ' / ' + graphSteps.length;
+
+  graphStep++;
+  if (graphStep >= graphSteps.length) {
+    document.getElementById('btn-step').disabled = true;
+    document.getElementById('btn-step').textContent = '✅ Complete!';
+  }
+}
+
+function resetGraph() {
+  graphStep = 0;
+  ['start','research','draft','review','end'].forEach(n => {
+    const pill = document.getElementById('pill-' + n);
+    pill.textContent = 'waiting';
+    pill.style.background = '#E8E6FF';
+    pill.style.color = '#4A3880';
+    document.getElementById('pnode-' + n).classList.remove('active-node');
+  });
+  document.getElementById('ls-topic').textContent = '"AI in Education"';
+  document.getElementById('ls-topic').className = 'val';
+  document.getElementById('ls-facts').textContent = '[ ]  ← empty';
+  document.getElementById('ls-facts').className = 'val empty';
+  document.getElementById('ls-draft').textContent = '""  ← empty';
+  document.getElementById('ls-draft').className = 'val empty';
+  document.getElementById('ls-review').textContent = '""  ← empty';
+  document.getElementById('ls-review').className = 'val empty';
+  document.getElementById('sim-msg').textContent = '👆 Press "Run step by step" to start the AI factory!';
+  document.getElementById('step-counter').textContent = 'Step 0 / 5';
+  const btn = document.getElementById('btn-step');
+  btn.disabled = false;
+  btn.textContent = '▶ Run step by step';
+}
+
+function nodeClick(name) {
+  const info = {
+    research: '🔬 research_node reads "topic" from state, calls the LLM, and writes "facts" back to state.',
+    draft: '✍️ draft_node reads "facts" from state, calls the LLM to write a blog, and writes "draft" back.',
+    review: '🔍 review_node reads "draft" from state, checks quality, and writes "review" back.'
+  };
+  document.getElementById('sim-msg').textContent = info[name] || '';
+}
+
+// ---- QUIZ ----
+const questions = [
+  {
+    q: "What is State in LangGraph?",
+    options: ["A robot that does AI work", "A shared backpack of data all nodes can read/write", "A hallway connecting robots", "The full factory"],
+    correct: 1,
+    explain: "✅ State is like a shared backpack! All nodes read from it and write their results back to it."
+  },
+  {
+    q: "What does a Node do?",
+    options: ["Connects two other nodes", "Stores all data permanently", "Takes state in, does ONE job, returns updated data", "Starts and ends the graph"],
+    correct: 2,
+    explain: "✅ A Node is a function with ONE job. It reads state, does its work, and returns a partial dict to update state."
+  },
+  {
+    q: "What is an Edge?",
+    options: ["A Python class for storing data", "A connection that tells the graph which node runs next", "The final output of the graph", "A type of LLM model"],
+    correct: 1,
+    explain: "✅ An Edge is the connection (hallway) between nodes. It decides which robot (node) goes next!"
+  },
+  {
+    q: "What is a Conditional Edge?",
+    options: ["An edge that always goes from A to B", "An edge that checks state and decides which node to go to", "An edge that loops forever", "An edge that connects to START"],
+    correct: 1,
+    explain: "✅ A Conditional Edge is like an if/else! It checks the state and decides between multiple paths."
+  },
+  {
+    q: "How do you start running a LangGraph graph?",
+    options: ["node.run()", "graph.start()", "graph.compile() then app.invoke(initial_state)", "StateGraph.begin()"],
+    correct: 2,
+    explain: "✅ You compile() the graph to build it, then call invoke() with your initial state to run it!"
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = `
+    <div class="quiz-q">Q${currentQ + 1}: ${q.q}</div>
+    <div class="quiz-options">
+      ${q.options.map((opt, i) => `<button class="quiz-option" onclick="answerQ(${i})">${opt}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+  `;
+  document.getElementById('quiz-progress').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+  document.getElementById('quiz-next-btn').style.display = 'none';
+}
+
+function answerQ(idx) {
+  const q = questions[currentQ];
+  const btns = document.querySelectorAll('.quiz-option');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(idx === q.correct ? 'correct' : 'wrong');
+  if (idx !== q.correct) btns[q.correct].classList.add('correct');
+  const fb = document.getElementById('quiz-feedback');
+  if (idx === q.correct) {
+    score++;
+    fb.innerHTML = `<span style="color:var(--teal)">${q.explain}</span>`;
+  } else {
+    fb.innerHTML = `<span style="color:#E05555">❌ Not quite! ${q.explain}</span>`;
+  }
+  const nextBtn = document.getElementById('quiz-next-btn');
+  if (currentQ < questions.length - 1) {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Next question →';
+  } else {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'See my score 🎯';
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < questions.length) {
+    renderQuestion();
+  } else {
+    showScore();
+  }
+}
+
+function showScore() {
+  const emojis = ['😅', '🙂', '😊', '🎉', '🏆'];
+  const msgs = ['Keep studying! You got this!', 'Good try! Review the concepts above.', 'Nice work! Almost there!', 'Great job! You really understand LangGraph!', 'PERFECT SCORE! You are a LangGraph master! 🚀'];
+  const idx = Math.min(Math.floor((score / questions.length) * emojis.length), emojis.length - 1);
+  document.getElementById('quiz-container').innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:64px;margin-bottom:16px">${emojis[idx]}</div>
+      <div style="font-size:28px;font-weight:900;color:var(--purple);margin-bottom:8px">You scored ${score} / ${questions.length}</div>
+      <div style="font-size:17px;color:var(--text-mid);margin-bottom:24px">${msgs[idx]}</div>
+      <button class="btn-main btn-purple" onclick="restartQuiz()">Try again 🔄</button>
+    </div>
+  `;
+  document.getElementById('quiz-next-btn').style.display = 'none';
+  document.getElementById('quiz-progress').textContent = `Final score: ${score}/${questions.length}`;
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  score = 0;
+  renderQuestion();
+}
+
+// init
+renderQuestion();
+</script>
+</body>
+</html>
